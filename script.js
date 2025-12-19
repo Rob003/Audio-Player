@@ -63,8 +63,8 @@ const audioRepeatBtn = document.querySelector(".audioRepeatBtn")
 const audioFavoriteBtn = document.querySelector(".audioFavoriteBtn")
 
 const progressInput = document.querySelector(".progressInput")
-const audioCurrentTime = document.querySelector(".audioCurrentTime")
-const audioDuration = document.querySelector(".audioDuration")
+const audioCurrentTimeEl = document.querySelector(".audioCurrentTime")
+const audioDurationEl = document.querySelector(".audioDuration")
 
 const prevBtn = document.querySelector(".prevBtn")
 const nextBtn = document.querySelector(".nextBtn")
@@ -89,6 +89,12 @@ nextBtn.onclick = () => {
         audioIndex++
     }
     loadAudio(audioIndex)
+    if (audio.classList.contains("isPlay")) {
+        playAudio()
+    } else {
+        pausAudio()
+    }
+    like()
 }
 prevBtn.onclick = () => {
     if (audioIndex === 0) {
@@ -97,7 +103,96 @@ prevBtn.onclick = () => {
         audioIndex--
     }
     loadAudio(audioIndex)
+    if (audio.classList.contains("isPlay")) {
+        playAudio()
+    } else {
+        pausAudio()
+    }
+    like()
+}
+
+loadAudio(audioIndex)
+
+
+function playAudio() {
+    audio.play()
+    audio.classList.add("isPlay")
+    playPauseIcon.className = "fa fa-pause"
+}
+
+function pausAudio() {
+    audio.pause()
+    audio.classList.remove("isPlay")
+    playPauseIcon.className = "fa fa-play"
+}
+
+playPauseBtn.onclick = () => {
+    if (audio.classList.contains("isPlay")) {
+        pausAudio()
+    } else {
+        playAudio()
+    }
+}
+
+audio.addEventListener("timeupdate", function () {
+    let audioDuration = audio.duration
+    let audioCurrentTime = audio.currentTime
+
+    if (audioCurrentTime > 0) {
+        audioCurrentTimeEl.textContent = getTime(audioCurrentTime)
+        audioDurationEl.textContent = getTime(audioDuration)
+        progressInput.value = audioCurrentTime / audioDuration * 100
+    }
+})
+
+function getTime(time) {
+    let minuts = Math.floor(time / 60)
+    let seconds = Math.floor(time % 60)
+    return `${minuts < 10 ? "0" + minuts : minuts} : ${seconds < 10 ? "0" + seconds : seconds}`
 }
 
 
-loadAudio(audioIndex)
+progressInput.oninput = () => {
+    audio.currentTime = progressInput.value * audio.duration / 100
+}
+
+audio.addEventListener("ended", function () {
+
+})
+
+audioRandomBtn.onclick = () => {
+    audioRandomBtn.classList.toggle("activ")
+    audioRepeatBtn.classList.remove("activ")
+}
+
+audioRepeatBtn.onclick = () => {
+    audioRepeatBtn.classList.toggle("activ")
+    audioRandomBtn.classList.remove("activ")
+}
+
+audioFavoriteBtn.onclick = () => {
+    if (audioData[audioIndex].isFavorite === false) {
+        audioData[audioIndex].isFavorite = true
+    } else if (audioData[audioIndex].isFavorite === true) {
+        audioData[audioIndex].isFavorite = false
+    }
+
+    like()
+    let audioDataFavorite = likeArr(audioData)
+}
+
+
+function like() {
+    if (audioData[audioIndex].isFavorite) {
+        audioFavoriteBtn.classList.add("activ")
+    } else {
+        audioFavoriteBtn.classList.remove("activ")
+    }
+}
+
+like()
+
+function likeArr(arr) {
+    let audioDataFavorite = arr.filter(el => el.isFavorite === true)
+    return audioDataFavorite
+}
